@@ -17,21 +17,24 @@ interface JWTPayload {
   password: string;
 }
 
+
 app.post('/login',
   (req, res) => {
 
     const { username, password } = req.body
+    const token = req.body
     // Use username and password to create token.
 
     return res.status(200).json({
       message: 'Login succesfully',
+      token: 'token ${token}',
     })
   })
 
 app.post('/register',
   (req, res) => {
 
-    const { username, password, firstname, lastname, balance } = req.body
+    const { username, password, firstname, lastname, balance } = req.body  
   })
 
 app.get('/balance',
@@ -42,6 +45,10 @@ app.get('/balance',
   
     }
     catch (e) {
+  
+      return  res.status(401).json({
+        message: 'Invalid token'
+      })
       //response in case of invalid token
     }
   })
@@ -69,7 +76,10 @@ app.delete('/reset', (req, res) => {
 })
 
 app.get('/me', (req, res) => {
-  
+  res.status(200).json({firstname: 'charnnarong'})
+  res.status(200).json({lastname: 'charoensanongkun'})
+  res.status(200).json({code: '620612146'})
+  res.status(200).json({gpa: '4.5'})
 })
 
 app.get('/demo', (req, res) => {
