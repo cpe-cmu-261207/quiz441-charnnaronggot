@@ -4,6 +4,7 @@ import cors from 'cors'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { body, query, validationResult } from 'express-validator'
+import fs from 'fs'
 
 const app = express()
 app.use(bodyParser.json())
@@ -16,20 +17,45 @@ interface JWTPayload {
   username: string;
   password: string;
 }
+interface DbSchema {
+  users: User[]
+}
+
+interface User {
+  password : string
+  username: string
+  firstname : string 
+  lastname : string 
+  balacne : number
+}
+
+type RegisterArgs = Omit<User, 'id'>
+
+type LoginArgs = Pick<JWTPayload, 'username' | 'password'>
 
 
-app.post('/login',
-  (req, res) => {
+app.post<any, any, LoginArgs>('/login', (req, res) => {
 
-    const { username, password } = req.body
-    const token = req.body
-    // Use username and password to create token.
+  const { username, password } = req.body
 
-    return res.status(200).json({
-      message: 'Login succesfully',
-      token: 'token ${token}',
-    })
-  })
+  const body = req.body
+  const raw = fs.readFileSync('db.json', 'utf8')
+  const db: DbSchema = JSON.parse(raw)
+  const user = db.users.find(user => user.username === body.username)
+  if (!user) {
+    res.status(400)
+    res.json({ message: 'Invalid username or password' })
+    return
+  }
+  if (!bcrypt.compareSync(body.password, user.password)) {
+    res.status(400)
+    res.json({ message: 'Invalid username or password' })
+    return
+  }
+
+  
+
+})
 
 app.post('/register',
   (req, res) => {
@@ -89,3 +115,7 @@ app.get('/demo', (req, res) => {
 })
 
 app.listen(PORT, () => console.log(`Server is running at ${PORT}`))
+
+function SECRET_KEY(arg0: { username: string }, SECRET_KEY: any) {
+  throw new Error('Function not implemented.')
+}
